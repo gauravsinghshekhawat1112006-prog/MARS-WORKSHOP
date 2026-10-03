@@ -14,11 +14,7 @@ The matrix shows a random pattern for a few seconds. The pattern disappears, and
 4. [Installing the Arduino IDE](#4-installing-the-arduino-ide)
 5. [Installing the LedControl library](#5-installing-the-ledcontrol-library)
 6. [Uploading the game](#6-uploading-the-game)
-7. [Testing your hardware](#7-testing-your-hardware)
-8. [Playing the game](#8-playing-the-game)
-9. [Customizing the game](#9-customizing-the-game)
-10. [Troubleshooting](#10-troubleshooting)
-11. [Workshop tips and ideas](#11-workshop-tips-and-ideas)
+7. [Playing the game](#7-playing-the-game)
 
 ---
 
@@ -26,12 +22,11 @@ The matrix shows a random pattern for a few seconds. The pattern disappears, and
 
 | Part | Notes |
 |---|---|
-| Arduino Uno or Nano | Any ATmega328P board works |
+| Arduino Uno | 
 | USB cable | The correct type for your board (Uno: USB-B, Nano: Mini-USB or Micro-USB) |
 | 8x8 LED matrix with **MAX7219** driver | The module with 5 pins: VCC, GND, DIN, CS, CLK |
 | **HW-504** analog joystick module | 5 pins: GND, +5V, VRx, VRy, SW |
-| Breadboard | For sharing 5V and GND |
-| Jumper wires | Male-to-male and/or male-to-female depending on your modules |
+| Jumper wires | Male-to-female |
 | A computer | Windows, macOS or Linux |
 
 > **Photo of the finished setup:** add your own photo to an `images/` folder and it will show up here.
@@ -54,21 +49,12 @@ The matrix shows a random pattern for a few seconds. The pattern disappears, and
 
 The size of one "square" shrinks as you level up. Each new stage also starts with fewer squares, so the jump in difficulty is fair.
 
-| Stage | Levels | Square size | Grid | Squares to remember |
+| Stage | Levels | Square size |
 |---|---|---|---|---|
-| 1 | 1 - 4 | 2x2 LEDs (big squares) | 4 x 4 = 16 | 3 to 6 |
-| 2 | 5 - 8 | 2x1 LEDs (rectangles) | 4 x 8 = 32 | 3 to 6 |
-| 3 | 9 - 16 | 1x1 LED (single pixel) | 8 x 8 = 64 | 4 to 11 |
+| 1 | 1 - 6 | 2x2 LEDs (big squares) | 
+| 2 | 7 - 10 | 2x1 LEDs (rectangles) |  
+| 3 |  1x1 LED (single pixel) | 
 
-What the three stages look like (`#` = lit LED):
-
-```
-Stage 1 (2x2)       Stage 2 (2x1)       Stage 3 (1x1)
-##..##..            ##..##..            #...#...
-##..##..            ......##            ....#...
-..##....            ##......            ..#.....
-..##....            ..##....            .....#..
-```
 
 ---
 
@@ -100,7 +86,7 @@ Stage 1 (2x2)       Stage 2 (2x1)       Stage 3 (1x1)
 
 ### Wiring tips
 
-- Both modules need 5V and GND. The Arduino has only a few of these pins, so connect 5V and GND to the **power rails of the breadboard** and branch from there.
+- Both modules need 5V and GND.
 - Many matrix modules have two 5-pin headers. Connect to the **input** side (labelled **DIN**), not the output side (**DOUT**).
 - Leave pin **A5 unconnected**. The code reads it to get random numbers so that every game is different.
 - The joystick button (SW) uses the Arduino's built-in pull-up resistor, so you do not need an extra resistor.
@@ -126,7 +112,6 @@ The Arduino IDE is the free program used to write code and upload it to the boar
 
 - **Windows:** double-click the downloaded `.exe` and follow the installer. Accept the driver prompts if they appear.
 - **macOS:** open the `.dmg` and drag **Arduino IDE** into the **Applications** folder.
-- **Linux:** make the AppImage executable (`chmod +x <file>.AppImage`) and run it, or extract the ZIP and run the program inside.
 
 ### Step 3: Connect the Arduino
 
@@ -139,12 +124,6 @@ The Arduino IDE is the free program used to write code and upload it to the boar
    - Windows: `COM3`, `COM4`, etc.
    - macOS: `/dev/cu.usbmodem...` or `/dev/cu.usbserial...`
    - Linux: `/dev/ttyUSB0` or `/dev/ttyACM0`
-
-### Extra steps for Nano clones or cheap boards
-
-- If the port does not appear, the board probably uses a **CH340** USB chip. Install the CH340 driver (search for "CH340 driver" for your operating system), then re-plug the board.
-- For an **Arduino Nano**, if uploading fails, go to **Tools > Processor** and select **ATmega328P (Old Bootloader)**.
-- On Linux, if the port is not accessible, add your user to the `dialout` group (`sudo usermod -a -G dialout $USER`) and log in again.
 
 ---
 
@@ -164,11 +143,6 @@ The game uses the **LedControl** library to talk to the MAX7219 matrix.
 
 ## 6. Uploading the game
 
-1. Keep these files together in a folder named **`pattern_memory_game`**:
-   - `pattern_memory_game.ino`
-   - `README.md`
-   - `wiring_diagram.svg`
-
    > The Arduino IDE needs the `.ino` file to be inside a folder with the **same name**. This is already set up correctly in this download.
 2. Open the Arduino IDE and go to **File > Open...**, then pick `pattern_memory_game.ino`.
 3. Check that the correct **Board** and **Port** are selected (**Tools** menu).
@@ -178,66 +152,8 @@ The game uses the **LedControl** library to talk to the MAX7219 matrix.
 
 ---
 
-## 7. Testing your hardware
 
-If something does not work, test each part on its own. Create a new sketch (**File > New Sketch**), paste one of these, and upload it.
-
-### Test A: LED matrix
-
-A single LED should move across the matrix one by one.
-
-```cpp
-#include <LedControl.h>
-LedControl lc = LedControl(12, 11, 10, 1);  // DIN, CLK, CS
-
-void setup() {
-  lc.shutdown(0, false);
-  lc.setIntensity(0, 5);
-  lc.clearDisplay(0);
-}
-
-void loop() {
-  for (int r = 0; r < 8; r++) {
-    for (int c = 0; c < 8; c++) {
-      lc.clearDisplay(0);
-      lc.setLed(0, r, c, true);
-      delay(100);
-    }
-  }
-}
-```
-
-If **all LEDs stay on** the whole time, the matrix is not receiving data. See the troubleshooting section.
-
-### Test B: Joystick
-
-Open **Tools > Serial Monitor** and set the speed to **9600 baud**.
-
-```cpp
-void setup() {
-  Serial.begin(9600);
-  pinMode(2, INPUT_PULLUP);
-}
-
-void loop() {
-  Serial.print("X: "); Serial.print(analogRead(A0));
-  Serial.print("  Y: "); Serial.print(analogRead(A1));
-  Serial.print("  Button: "); Serial.println(digitalRead(2));
-  delay(200);
-}
-```
-
-What you should see:
-
-| Action | X | Y | Button |
-|---|---|---|---|
-| Joystick centered | about 500 | about 500 | 1 |
-| Pushed to one end | near 0 or 1023 | near 0 or 1023 | 1 |
-| Button pressed | - | - | 0 |
-
----
-
-## 8. Playing the game
+## 7. Playing the game
 
 1. Power the Arduino over USB (or any 5V supply).
 2. Watch the pattern carefully while it is on screen.
@@ -250,59 +166,5 @@ The cursor **wraps around** the edges, so moving off the right edge brings you t
 
 ---
 
-## 9. Customizing the game
-
-All settings are at the top of `pattern_memory_game.ino`.
-
-| Setting | What it does | Default |
-|---|---|---|
-| `MAX_LEVEL` | Highest level of the game | 16 |
-| `STAGE1_LEVELS` | Number of levels with 2x2 squares | 4 |
-| `STAGE2_LEVELS` | Number of levels with 2x1 rectangles | 4 |
-| `START_CELLS_S1`, `S2`, `S3` | Number of squares in the first level of each stage | 3, 3, 4 |
-| `SHOW_TIME_BASE` | Base time (ms) the pattern is shown | 2000 |
-| `SHOW_TIME_PER_CELL` | Extra time (ms) added per square | 300 |
-| `LEVEL_DISPLAY_TIME` | How long (ms) the level number is shown | 1500 |
-| `MOVE_DELAY_S1`, `S2`, `S3` | Cursor speed in each stage (lower = faster) | 220, 190, 150 |
-| `INVERT_X`, `INVERT_Y` | Flip joystick directions | false |
-| `MIRROR_COLUMNS` | Mirror the matrix image (and the digits) | false |
-| `lc.setIntensity(0, 5)` in `setup()` | LED brightness, 0 to 15 | 5 |
-
----
-
-## 10. Troubleshooting
-
-| Problem | What to try |
-|---|---|
-| **All LEDs are on and nothing changes** | The matrix is not receiving data, or the sketch did not upload. Check that you are using the **DIN** side, that DIN/CLK/CS are on D12/D11/D10, and that GND is connected. Re-seat the jumper wires (cheap wires are often faulty). Run Test A. |
-| **Compile error: `LedControl.h: No such file`** | The library is not installed. Follow section 5. |
-| **Upload fails or the port is missing** | Check the USB cable (some cables are charge-only). Select the right board and port. Install the CH340 driver for clones. For a Nano, try *ATmega328P (Old Bootloader)*. |
-| **Cursor moves in the wrong direction** | Set `INVERT_X` and/or `INVERT_Y` to `true`. |
-| **Picture or digits look mirrored** | Set `MIRROR_COLUMNS` to `true`. |
-| **Picture is rotated 90 degrees** | Physically rotate the matrix module. Then adjust `INVERT_X`/`INVERT_Y` if the joystick directions feel wrong. |
-| **Cursor drifts by itself** | Run Test B. If the centered values are far from 500 (for example below 300 or above 700), the joystick is faulty or badly wired. |
-| **Button press does nothing** | Check the SW wire on D2. In Test B the button should read 0 when pressed. |
-| **Same pattern every time you restart** | Make sure pin A5 is left unconnected. |
-| **Matrix is very bright or dim** | Change the number in `lc.setIntensity(0, 5);` (0 to 15). |
-
----
-
-## 11. Workshop tips and ideas
-
-- Let participants wire everything themselves, then run Test A and Test B before uploading the game.
-- Have a colour-coded wire for each signal (the wiring diagram uses red for 5V, black for GND).
-- Challenge participants to change the difficulty: more squares per stage, shorter display time, or a different stage order.
-- Extension ideas:
-  - Add a buzzer for correct and wrong answers.
-  - Add a second matrix for a two-player mode.
-  - Keep and show a high score.
-  - Add a start screen that waits for a button press.
-
----
-
-## Credits
-
-- LED matrix control: the [LedControl](https://github.com/wayoda/LedControl) library by Eberhard Fahle.
-- Built with the Arduino platform.
 
 Have fun and happy building!
