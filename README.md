@@ -60,7 +60,7 @@ The size of one "square" shrinks as you level up. Each new stage also starts wit
 
 ## 3. Connections (wiring)
 
-![Wiring diagram](wiring_diagram.svg)
+![Wiring diagram](circuit_image.png)
 
 **Do all wiring with the Arduino unplugged from USB.**
 
